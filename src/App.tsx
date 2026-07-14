@@ -43,8 +43,8 @@ import { faqData, faqCategories } from "./faqData";
 import { reviewsData } from "./reviewsData";
 
 export default function App() {
-  // Navigation State: 'page1' to 'page13' + 'admin'
-  const [currentPage, setCurrentPage] = useState<string>("page1");
+  // Navigation State: 'accueil', 'installation', etc. + 'admin'
+  const [currentPage, setCurrentPage] = useState<string>("accueil");
   const [prevPages, setPrevPages] = useState<string[]>([]);
   
   // Channels data state
@@ -252,10 +252,10 @@ export default function App() {
       setCurrentPage(previous);
     } else {
       // Default fallback logic matching original js floating button
-      if (["page2", "page7", "page8", "page9", "reviews", "page10", "page11", "page12", "page13"].includes(currentPage)) {
-        setCurrentPage("page1");
-      } else if (["page3", "page4", "page5", "page6"].includes(currentPage)) {
-        setCurrentPage("page2");
+      if (["installation", "catalogue-chaines", "a-propos", "faq", "avis-clients", "confidentialite", "securite", "mentions-legales", "contact"].includes(currentPage)) {
+        setCurrentPage("accueil");
+      } else if (["installation-samsung", "installation-lg", "installation-android", "installation-satellite"].includes(currentPage)) {
+        setCurrentPage("installation");
       }
     }
   };
@@ -495,7 +495,7 @@ export default function App() {
       {/* Top Banner & Header Brand */}
       <header className="w-full bg-black/40 backdrop-blur-md border-b border-white/10 sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <button onClick={() => setCurrentPage("page1")} className="flex items-center gap-2.5 text-left group">
+          <button onClick={() => setCurrentPage("accueil")} className="flex items-center gap-2.5 text-left group">
             <img 
               src="https://raw.githubusercontent.com/iptvwebos-stack/repo/refs/heads/main/IMG_20260714_010908.jpg"
               alt="IPTV Casablanca Logo"
@@ -543,16 +543,16 @@ export default function App() {
             transition={{ duration: 0.3 }}
           >
             {/* ----------------- PAGE 1: HERO / ACCUEIL ----------------- */}
-            {currentPage === "page1" && (
+            {currentPage === "accueil" && (
               <section className="space-y-6">
                 <div className="overflow-hidden rounded-2xl border border-white/15 bg-black/40 shadow-2xl">
                   <img
-                    src="https://raw.githubusercontent.com/iptvwebos-stack/repo/refs/heads/main/headerimage.webp"
+                    src="https://raw.githubusercontent.com/iptvwebos-stack/repo/refs/heads/main/iptv-casablanca-premium.webp"
                     alt="IPTV Premium Casablanca Banner"
                     className="w-full object-cover max-h-72"
                     onError={(e) => {
                       // Fallback image if github is blocked or failed
-                      e.currentTarget.src = "/headerimage.webp";
+                      e.currentTarget.src = "/iptv-casablanca-premium.webp";
                     }}
                   />
                 </div>
@@ -578,7 +578,7 @@ export default function App() {
                   {/* Navigation Buttons for Main View */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md mx-auto pt-2">
                     <button
-                      onClick={() => handlePageChange("page7")}
+                      onClick={() => handlePageChange("catalogue-chaines")}
                       className="flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 py-4 px-6 rounded-2xl font-bold text-white shadow-lg shadow-purple-500/10 transition-all hover:scale-[1.02] active:scale-[0.98]"
                     >
                       <Film className="h-5 w-5" />
@@ -586,7 +586,7 @@ export default function App() {
                     </button>
                     
                     <button
-                      onClick={() => handlePageChange("page8")}
+                      onClick={() => handlePageChange("a-propos")}
                       className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 py-4 px-6 rounded-2xl font-bold text-white shadow-lg shadow-blue-500/10 transition-all hover:scale-[1.02] active:scale-[0.98]"
                     >
                       <Globe className="h-5 w-5" />
@@ -662,7 +662,7 @@ export default function App() {
                       
                       <div className="flex flex-wrap gap-2.5">
                         <button
-                          onClick={() => handlePageChange("reviews")}
+                          onClick={() => handlePageChange("avis-clients")}
                           className="inline-flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
                         >
                           <Star className="h-4 w-4 fill-slate-950" />
@@ -686,7 +686,7 @@ export default function App() {
 
                   {/* Subscribe Action button */}
                   <button
-                    onClick={() => handlePageChange("page2")}
+                    onClick={() => handlePageChange("installation")}
                     className="w-full bg-gradient-to-r from-[#ff416c] to-[#ff4b2b] hover:from-[#ff527c] hover:to-[#ff5c3c] py-4.5 px-6 rounded-2xl font-extrabold text-lg text-white shadow-xl shadow-red-500/20 transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <span>Commander / S'abonner Maintenant</span>
@@ -699,7 +699,7 @@ export default function App() {
             )}
 
             {/* ----------------- PAGE 2: CHOOSE PLATFORM ----------------- */}
-            {currentPage === "page2" && (
+            {currentPage === "installation" && (
               <section className="bg-black/70 border border-white/10 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl text-center">
                 <h2 className="text-2xl md:text-3xl font-black text-amber-400">Choisissez Votre Plateforme</h2>
                 <p className="text-slate-300 max-w-xl mx-auto text-sm md:text-base">
@@ -708,7 +708,7 @@ export default function App() {
 
                 <div className="grid grid-cols-2 gap-4 md:gap-6 pt-4 max-w-2xl mx-auto">
                   <button
-                    onClick={() => handlePageChange("page3")}
+                    onClick={() => handlePageChange("installation-samsung")}
                     className="bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl p-6 transition-all hover:-translate-y-1 flex flex-col items-center justify-center gap-3 group text-center"
                   >
                     <div className="h-16 w-16 rounded-full bg-white flex items-center justify-center p-3 shadow-md">
@@ -725,7 +725,7 @@ export default function App() {
                   </button>
 
                   <button
-                    onClick={() => handlePageChange("page4")}
+                    onClick={() => handlePageChange("installation-lg")}
                     className="bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl p-6 transition-all hover:-translate-y-1 flex flex-col items-center justify-center gap-3 group text-center"
                   >
                     <div className="h-16 w-16 rounded-full bg-white flex items-center justify-center p-3 shadow-md">
@@ -742,7 +742,7 @@ export default function App() {
                   </button>
 
                   <button
-                    onClick={() => handlePageChange("page5")}
+                    onClick={() => handlePageChange("installation-android")}
                     className="bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl p-6 transition-all hover:-translate-y-1 flex flex-col items-center justify-center gap-3 group text-center"
                   >
                     <div className="h-16 w-16 rounded-full bg-white flex items-center justify-center p-3 shadow-md">
@@ -759,7 +759,7 @@ export default function App() {
                   </button>
 
                   <button
-                    onClick={() => handlePageChange("page6")}
+                    onClick={() => handlePageChange("installation-satellite")}
                     className="bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl p-6 transition-all hover:-translate-y-1 flex flex-col items-center justify-center gap-3 group text-center"
                   >
                     <div className="h-16 w-16 rounded-full bg-white flex items-center justify-center p-3 shadow-md">
@@ -781,7 +781,7 @@ export default function App() {
             )}
 
             {/* ----------------- PAGE 3: SAMSUNG TV ----------------- */}
-            {currentPage === "page3" && (
+            {currentPage === "installation-samsung" && (
               <section className="bg-black/70 border border-white/10 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl">
                 <div className="text-center space-y-2">
                   <h2 className="text-2xl md:text-3xl font-black text-amber-400">Installation sur Samsung TV</h2>
@@ -901,7 +901,7 @@ export default function App() {
             )}
 
             {/* ----------------- PAGE 4: LG TV ----------------- */}
-            {currentPage === "page4" && (
+            {currentPage === "installation-lg" && (
               <section className="bg-black/70 border border-white/10 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl">
                 <div className="text-center space-y-2">
                   <h2 className="text-2xl md:text-3xl font-black text-amber-400">Installation sur LG TV</h2>
@@ -1020,7 +1020,7 @@ export default function App() {
             )}
 
             {/* ----------------- PAGE 5: ANDROID TV/BOX ----------------- */}
-            {currentPage === "page5" && (
+            {currentPage === "installation-android" && (
               <section className="bg-black/70 border border-white/10 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl">
                 <div className="text-center space-y-2">
                   <h2 className="text-2xl md:text-3xl font-black text-amber-400">Installation sur Android TV & Box TV</h2>
@@ -1153,11 +1153,11 @@ export default function App() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
                       <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-xl bg-black/60 group">
                         <img
-                          src="https://raw.githubusercontent.com/iptvwebos-stack/repo/refs/heads/main/Screenshot_2026-06-14-16-09-12-15_0a9ce44baf73f348a1c5ad44fb791fa4.jpg"
+                          src="https://raw.githubusercontent.com/iptvwebos-stack/repo/refs/heads/main/xciptv-page-accueil.jpg"
                           alt="XCIPTV Player Interface Mockup"
                           className="w-full h-full object-cover opacity-90 transition-all duration-300 group-hover:scale-105"
                           referrerPolicy="no-referrer"
-                          onError={(e) => { e.currentTarget.src = "/xciptv_preview.jpg"; }}
+                          onError={(e) => { e.currentTarget.src = "/xciptv-page-accueil.jpg"; }}
                         />
                         <div className="absolute bottom-3 left-3 bg-black/80 py-1 px-3.5 rounded-lg text-[10px] font-mono text-slate-300">
                           Écran principal de l'interface XCIPTV
@@ -1166,11 +1166,11 @@ export default function App() {
 
                       <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-xl bg-black/60 group">
                         <img
-                          src="https://raw.githubusercontent.com/iptvwebos-stack/repo/refs/heads/main/xciptv-player-24650-1.jpg"
+                          src="https://raw.githubusercontent.com/iptvwebos-stack/repo/refs/heads/main/xciptv-identifiants.jpg"
                           alt="XCIPTV Credentials Input Screen"
                           className="w-full h-full object-cover opacity-90 transition-all duration-300 group-hover:scale-105"
                           referrerPolicy="no-referrer"
-                          onError={(e) => { e.currentTarget.src = "/xciptv_login.jpg"; }}
+                          onError={(e) => { e.currentTarget.src = "/xciptv-identifiants.jpg"; }}
                         />
                         <div className="absolute bottom-3 left-3 bg-black/80 py-1 px-3.5 rounded-lg text-[10px] font-mono text-slate-300">
                           Écran de saisie des identifiants (Xtream API)
@@ -1249,7 +1249,7 @@ export default function App() {
             )}
 
             {/* ----------------- PAGE 6: SATELLITE RECEIVER ----------------- */}
-            {currentPage === "page6" && (
+            {currentPage === "installation-satellite" && (
               <section className="bg-black/70 border border-white/10 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl">
                 <div className="text-center space-y-2">
                   <h2 className="text-2xl md:text-3xl font-black text-amber-400">Récepteur Satellite</h2>
@@ -1364,7 +1364,7 @@ export default function App() {
             )}
 
             {/* ----------------- PAGE 7: CHANNELS & VOD CATALOG ----------------- */}
-            {currentPage === "page7" && (
+            {currentPage === "catalogue-chaines" && (
               <section className="bg-black/70 border border-white/10 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl">
                 <div className="text-center space-y-2">
                   <h2 className="text-2xl md:text-3xl font-black text-amber-400">Liste des chaînes & VOD & Séries</h2>
@@ -1451,7 +1451,7 @@ export default function App() {
             )}
 
             {/* ----------------- PAGE 8: À PROPOS DE NOUS ----------------- */}
-            {currentPage === "page8" && (
+            {currentPage === "a-propos" && (
               <section className="bg-black/70 border border-white/10 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl">
                 <div className="text-center space-y-2">
                   <h2 className="text-2xl md:text-3xl font-black text-amber-400">À propos de nous</h2>
@@ -1546,7 +1546,7 @@ export default function App() {
             )}
 
             {/* ----------------- PAGE 9: FAQ ----------------- */}
-            {currentPage === "page9" && (() => {
+            {currentPage === "faq" && (() => {
               const filteredFaqs = faqData.filter(item => {
                 const matchesCategory = faqActiveCategory === "all" || item.category === faqActiveCategory;
                 const query = faqSearchQuery.toLowerCase().trim();
@@ -1675,7 +1675,7 @@ export default function App() {
             })()}
 
             {/* ----------------- PAGE REVIEWS: AVIS GOOGLE MAPS ----------------- */}
-            {currentPage === "reviews" && (() => {
+            {currentPage === "avis-clients" && (() => {
               const filteredReviews = reviewsData.filter(item => {
                 const query = reviewsSearchQuery.toLowerCase().trim();
                 const matchesSearch = !query || 
@@ -1941,7 +1941,7 @@ export default function App() {
             })()}
 
             {/* ----------------- PAGE 10: CONFIDENTIALITÉ ----------------- */}
-            {currentPage === "page10" && (
+            {currentPage === "confidentialite" && (
               <section className="bg-black/70 border border-white/10 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl">
                 <div className="text-center space-y-2">
                   <h2 className="text-2xl md:text-3xl font-black text-amber-400">Politique de Confidentialité</h2>
@@ -1975,7 +1975,7 @@ export default function App() {
             )}
 
             {/* ----------------- PAGE 11: SÉCURITÉ DES DONNÉES ----------------- */}
-            {currentPage === "page11" && (
+            {currentPage === "securite" && (
               <section className="bg-black/70 border border-white/10 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl">
                 <div className="text-center space-y-2">
                   <h2 className="text-2xl md:text-3xl font-black text-amber-400">Sécurité des Données</h2>
@@ -2025,7 +2025,7 @@ export default function App() {
             )}
 
             {/* ----------------- PAGE 12: MENTIONS LÉGALES ----------------- */}
-            {currentPage === "page12" && (
+            {currentPage === "mentions-legales" && (
               <section className="bg-black/70 border border-white/10 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl">
                 <div className="text-center space-y-2">
                   <h2 className="text-2xl md:text-3xl font-black text-amber-400">Mentions Légales & Avertissement</h2>
@@ -2059,7 +2059,7 @@ export default function App() {
             )}
 
             {/* ----------------- PAGE 13: CONTACT ----------------- */}
-            {currentPage === "page13" && (
+            {currentPage === "contact" && (
               <section className="bg-black/70 border border-white/10 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl">
                 <div className="text-center space-y-2">
                   <h2 className="text-2xl md:text-3xl font-black text-amber-400">Contact</h2>
@@ -2179,7 +2179,7 @@ export default function App() {
                     <button
                       onClick={() => {
                         setIsAdminLoggedIn(false);
-                        setCurrentPage("page1");
+                        setCurrentPage("accueil");
                       }}
                       className="ml-3 bg-red-600 hover:bg-red-500 text-white text-xs py-1.5 px-3.5 rounded-lg transition-all"
                     >
@@ -2610,7 +2610,7 @@ export default function App() {
       </main>
 
       {/* Floating back button (on bottom left) */}
-      {currentPage !== "page1" && (
+      {currentPage !== "accueil" && (
         <button
           onClick={handleBack}
           className="fixed bottom-36 md:bottom-24 left-4 md:left-6 z-30 bg-black/85 hover:bg-black text-white font-bold py-2.5 px-4 rounded-full flex items-center gap-2 border border-white/10 shadow-2xl transition-all hover:scale-105 active:scale-95 text-sm"
@@ -2779,7 +2779,7 @@ export default function App() {
       {/* Menu Footer */}
       <footer className="fixed bottom-0 left-0 right-0 z-30 bg-[#0a0f1d]/90 backdrop-blur-md border-t border-white/10 py-4 px-4 shadow-xl">
         <nav className="max-w-4xl mx-auto flex flex-wrap justify-center gap-3 md:gap-4 text-xs md:text-sm font-semibold">
-          {currentPage !== "page1" && (
+          {currentPage !== "accueil" && (
             <button
               onClick={handleBack}
               className="px-3.5 py-1.5 rounded-full bg-amber-500 text-slate-950 hover:bg-amber-400 transition-all flex items-center gap-1.5 font-black shadow-md cursor-pointer"
@@ -2789,50 +2789,50 @@ export default function App() {
             </button>
           )}
           <button
-            onClick={() => handlePageChange("page8")}
-            className={`px-3 py-1.5 rounded-full transition-all ${currentPage === "page8" ? "bg-amber-500 text-slate-950" : "text-slate-300 hover:bg-white/5 hover:text-white"}`}
+            onClick={() => handlePageChange("a-propos")}
+            className={`px-3 py-1.5 rounded-full transition-all ${currentPage === "a-propos" ? "bg-amber-500 text-slate-950" : "text-slate-300 hover:bg-white/5 hover:text-white"}`}
           >
             À propos
           </button>
           
           <button
-            onClick={() => handlePageChange("page9")}
-            className={`px-3 py-1.5 rounded-full transition-all ${currentPage === "page9" ? "bg-amber-500 text-slate-950" : "text-slate-300 hover:bg-white/5 hover:text-white"}`}
+            onClick={() => handlePageChange("faq")}
+            className={`px-3 py-1.5 rounded-full transition-all ${currentPage === "faq" ? "bg-amber-500 text-slate-950" : "text-slate-300 hover:bg-white/5 hover:text-white"}`}
           >
             FAQ
           </button>
 
           <button
-            onClick={() => handlePageChange("reviews")}
-            className={`px-3 py-1.5 rounded-full transition-all ${currentPage === "reviews" ? "bg-amber-500 text-slate-950" : "text-slate-300 hover:bg-white/5 hover:text-white"}`}
+            onClick={() => handlePageChange("avis-clients")}
+            className={`px-3 py-1.5 rounded-full transition-all ${currentPage === "avis-clients" ? "bg-amber-500 text-slate-950" : "text-slate-300 hover:bg-white/5 hover:text-white"}`}
           >
             Avis Clients
           </button>
 
           <button
-            onClick={() => handlePageChange("page10")}
-            className={`px-3 py-1.5 rounded-full transition-all ${currentPage === "page10" ? "bg-amber-500 text-slate-950" : "text-slate-300 hover:bg-white/5 hover:text-white"}`}
+            onClick={() => handlePageChange("confidentialite")}
+            className={`px-3 py-1.5 rounded-full transition-all ${currentPage === "confidentialite" ? "bg-amber-500 text-slate-950" : "text-slate-300 hover:bg-white/5 hover:text-white"}`}
           >
             Confidentialité
           </button>
 
           <button
-            onClick={() => handlePageChange("page11")}
-            className={`px-3 py-1.5 rounded-full transition-all ${currentPage === "page11" ? "bg-amber-500 text-slate-950" : "text-slate-300 hover:bg-white/5 hover:text-white"}`}
+            onClick={() => handlePageChange("securite")}
+            className={`px-3 py-1.5 rounded-full transition-all ${currentPage === "securite" ? "bg-amber-500 text-slate-950" : "text-slate-300 hover:bg-white/5 hover:text-white"}`}
           >
             Sécurité
           </button>
 
           <button
-            onClick={() => handlePageChange("page12")}
-            className={`px-3 py-1.5 rounded-full transition-all ${currentPage === "page12" ? "bg-amber-500 text-slate-950" : "text-slate-300 hover:bg-white/5 hover:text-white"}`}
+            onClick={() => handlePageChange("mentions-legales")}
+            className={`px-3 py-1.5 rounded-full transition-all ${currentPage === "mentions-legales" ? "bg-amber-500 text-slate-950" : "text-slate-300 hover:bg-white/5 hover:text-white"}`}
           >
             Mentions légales
           </button>
 
           <button
-            onClick={() => handlePageChange("page13")}
-            className={`px-3 py-1.5 rounded-full transition-all ${currentPage === "page13" ? "bg-amber-500 text-slate-950" : "text-slate-300 hover:bg-white/5 hover:text-white"}`}
+            onClick={() => handlePageChange("contact")}
+            className={`px-3 py-1.5 rounded-full transition-all ${currentPage === "contact" ? "bg-amber-500 text-slate-950" : "text-slate-300 hover:bg-white/5 hover:text-white"}`}
           >
             Contact
           </button>
