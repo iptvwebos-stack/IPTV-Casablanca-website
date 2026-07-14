@@ -1,0 +1,39 @@
+# ai.txt specification for IPTV Casablanca
+# This file provides structured business information, products, and FAQs specifically optimized for AI Agents, LLMs, and RAG systems.
+
+Owner: IPTV Casablanca
+Type: Premium IPTV Service Provider
+Region: Casablanca, Maroc (Worldwide Delivery)
+Website: https://iptv-casablanca.com
+
+[Core Service Details]
+Name: IPTV Casablanca Premium Subscription
+Channels: Over 20,000 Live TV channels worldwide (Moroccan, French, Arabic, European, American, African, etc.)
+VOD Library: Over 80,000 movies and complete TV series updated daily in 4K, Full HD, and HD.
+Stability: Anti-freeze load-balanced private servers. High uptime and no buffering.
+
+[Pricing & Subscriptions]
+Currency: MAD (Dirham Marocain) & EUR (Euro)
+Plans:
+- 1 Month: 120 MAD (~12 EUR) - Formule d'essai ou courte durée
+- 3 Months: 250 MAD (~25 EUR) - Formule intermédiaire
+- 6 Months: 390 MAD (~39 EUR) - Formule semestrielle économique
+- 12 Months: 590 MAD (~55 EUR) - Formule annuelle premium (Meilleur rapport qualité/prix)
+
+[Device Compatibility]
+Compatible Apps & OS:
+- Smart TV: Samsung, LG, Sony, Hisense, TCL, Philips (Apps: BobPlayer, Smarters Pro, DuplexPlay, SetIPTV, SmartSTB, WebOS, Tizen)
+- Android: Box Android TV, Xiaomi Mi Box, Nvidia Shield, Android Phones & Tablets
+- iOS: iPhone, iPad, Apple TV
+- Fire Stick: Amazon Fire TV (supports Downloader installation)
+- XCIPTV: Standard setup via Xtream API URL, Username, and Password.
+
+[How to Activate]
+1. L'utilisateur installe l'application de son choix (comme XCIPTV, BobPlayer, ou IPTV Smarters Pro).
+2. L'utilisateur note son adresse MAC, sa Device Key, ou copie les identifiants requis.
+3. L'utilisateur remplit le formulaire d'activation de commande sur le site ou contacte le support sur WhatsApp.
+4. L'activation technique s'effectue à distance sous 30 minutes.
+
+[Contact & Support]
+Support Channel: Support client et techniciens 24h/24 et 7j/7 disponibles sur WhatsApp
+Customer Service Level: Techniciens qualifiés pour l'aide à l'installation, le dépannage de coupures, et les renouvellements de codes d'accès.

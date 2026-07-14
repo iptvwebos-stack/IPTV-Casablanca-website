@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme {
+  --background-primary-gradient: linear-gradient(135deg, #1a2a6c, #b21f1f, #001510);
+  --background-button-gradient: linear-gradient(to right, #ff416c, #ff4b2b);
+  --background-whatsapp-gradient: linear-gradient(to right, #25d366, #128c7e);
+  --background-channels-gradient: linear-gradient(to right, #9C27B0, #673AB7);
+  --background-about-gradient: linear-gradient(to right, #3a7bd5, #00d2ff);
+  --background-price-gradient: linear-gradient(135deg, #ffcc00, #ff9800);
+  --background-header-gradient: linear-gradient(to right, #4fc3f7, #0288d1);
+  --background-footer-gradient: linear-gradient(to right, #2c3e50, #4ca1af);
+  
+  --font-sans: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+body {
+  background: linear-gradient(135deg, #1a2a6c, #b21f1f, #001510);
+  background-attachment: fixed;
+  color: #ffffff;
+  font-family: var(--font-sans);
+}

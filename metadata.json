@@ -1,0 +1,6 @@
+{
+  "name": "IPTV Casablanca",
+  "description": "Plateforme premium de vente d'abonnements IPTV avec une large sélection de chaînes et support client dédié.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

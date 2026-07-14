@@ -1,0 +1,27 @@
+# robots.txt for IPTV Casablanca
+User-agent: *
+Allow: /
+
+# Explicitly allow and welcome AI crawlers for discoverability and citation index
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+Sitemap: https://iptv-casablanca.com/sitemap.xml
