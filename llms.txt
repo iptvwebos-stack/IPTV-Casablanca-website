@@ -1,0 +1,39 @@
+# IPTV Casablanca
+
+IPTV Casablanca is a premium, high-performance web platform designed to facilitate the sale and installation of IPTV subscriptions. It features a complete list of channels, a comprehensive VOD catalog, fully detailed multi-platform installation guides, customer reviews, a robust FAQ section, and a secure admin panel for configuration management.
+
+## Project Structure
+
+- `server.ts`: Full-stack Express server acting as the entry point. It serves the production build static assets and provides API proxies or admin capabilities.
+- `src/App.tsx`: Main React application container driving page routing, animations, customer reviews, interactive FAQ, and channel lookup.
+- `src/main.tsx`: Entry point for React rendering.
+- `src/index.css`: Global Tailwind CSS imports and variable/theme configuration.
+- `src/types.ts`: TypeScript data structures, interfaces, and enums used throughout the client and server.
+- `src/data.ts`: Holds channels and static data representations.
+- `src/faqData.ts`: Formatted questions and answers categorized for the platform's multi-tier customer base.
+- `src/reviewsData.ts`: Local repository of simulated and genuine Google Maps reviews.
+
+## Page Routing & Navigation Map
+
+The application employs a custom single-page-app navigation state manager using semantic URL-like slugs (states) instead of default numeric page identifiers:
+
+- `accueil`: The entry landing/hero page of IPTV Casablanca, showcasing marketing value, quick highlights, and major user entry paths.
+- `installation`: Interactive wizard where the user selects their device platform to receive guided setup steps.
+  - `installation-samsung`: Step-by-step setup tutorial for Samsung Smart TVs.
+  - `installation-lg`: Step-by-step setup tutorial for LG Smart TVs.
+  - `installation-android`: Step-by-step setup tutorial for Android TV and Android Boxes (using XCIPTV and Downloader).
+  - `installation-satellite`: Configuration instructions for traditional Satellite Receivers.
+- `catalogue-chaines`: Searchable list of live channels, video-on-demand (VOD), and series.
+- `a-propos`: About Us page outlining the values, performance metrics, and history of the service.
+- `faq`: Interactive and searchable Frequently Asked Questions (FAQ) with category filtering.
+- `avis-clients`: Clean display of customer reviews with filters for star rating levels.
+- `contact`: Form and channels for getting in touch with the sales or support teams.
+- `confidentialite`: Privacy policy document.
+- `securite`: Data security specifications and assurance statements.
+- `mentions-legales`: Terms of service, disclaimer, and legal conditions.
+
+## Stack Details
+
+- **Frontend**: React 19, TypeScript, Tailwind CSS, Lucide React (for uniform vector icons), Motion (via `motion/react` for elegant layout and transition animations).
+- **Backend**: Express on Node.js running under dev runner `tsx`.
+- **Build Engine**: Vite + esbuild (bundles server-side code into single CJS target `dist/server.cjs` for container deployment).

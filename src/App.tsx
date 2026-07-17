@@ -35,12 +35,14 @@ import {
   ShieldAlert,
   Cookie,
   Star,
-  MapPin
+  MapPin,
+  Image as ImageIcon
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { ChatMessage, ChannelData, Order, TrialRequest, ContactMessage } from "./types";
 import { faqData, faqCategories } from "./faqData";
 import { reviewsData } from "./reviewsData";
+import AdminMediaManager from "./components/AdminMediaManager";
 
 export default function App() {
   // Navigation State: 'accueil', 'installation', etc. + 'admin'
@@ -83,7 +85,7 @@ export default function App() {
   const [adminPassInput, setAdminPassInput] = useState("");
   const [adminLoginError, setAdminLoginError] = useState("");
   const [showAdminLoginModal, setShowAdminLoginModal] = useState(false);
-  const [adminTab, setAdminTab] = useState<"stats" | "orders" | "trials" | "contacts" | "settings">("stats");
+  const [adminTab, setAdminTab] = useState<"stats" | "orders" | "trials" | "contacts" | "settings" | "media">("stats");
 
   // YouTube modal state
   const [videoModalId, setVideoModalId] = useState<string | null>(null);
@@ -149,86 +151,73 @@ export default function App() {
       setShowCookieBanner(true);
     }
 
-    // Load persisted dashboard data
-    const savedOrders = localStorage.getItem("iptv_orders");
-    const savedTrials = localStorage.getItem("iptv_trials");
-    const savedContacts = localStorage.getItem("iptv_contacts");
-    const savedWhatsapp = localStorage.getItem("iptv_whatsapp_number");
-    const savedPrice = localStorage.getItem("iptv_annual_price");
-    const savedAdminPass = localStorage.getItem("iptv_admin_password");
-
-    if (savedOrders) setOrders(JSON.parse(savedOrders));
-    else {
-      // Pre-seed some professional sample orders
-      const seedOrders: Order[] = [
-        {
-          id: "ORD-9482",
-          name: "Mohamed El Alami",
-          phone: "+212661234567",
-          planName: "Abonnement Annuel Premium",
-          price: "250 DH",
-          device: "Samsung TV",
-          macAddress: "AA:BB:CC:DD:EE:11",
-          deviceKey: "847293",
-          appChosen: "BobPlayer",
-          status: "active",
-          date: "12/07/2026",
-          timestamp: Date.now() - 86400000
-        },
-        {
-          id: "ORD-2719",
-          name: "Sarah Bensouda",
-          phone: "+212675987654",
-          planName: "Abonnement Annuel Premium",
-          price: "250 DH",
-          device: "Android TV/BOXTV",
-          appChosen: "1-Stream Player",
-          status: "pending",
-          date: "12/07/2026",
-          timestamp: Date.now() - 3600000
+    // Load persisted dashboard data from server
+    fetch("/api/data")
+      .then(res => res.json())
+      .then(data => {
+        if (data.orders && data.orders.length > 0) setOrders(data.orders);
+        else {
+          const seedOrders: Order[] = [
+            {
+              id: "ORD-9482",
+              name: "Mohamed El Alami",
+              phone: "+212661234567",
+              planName: "Abonnement Annuel Premium",
+              price: "250 DH",
+              device: "Samsung TV",
+              macAddress: "AA:BB:CC:DD:EE:11",
+              deviceKey: "847293",
+              appChosen: "BobPlayer",
+              status: "active",
+              date: "12/07/2026",
+              timestamp: Date.now() - 86400000
+            }
+          ];
+          setOrders(seedOrders);
+          fetch("/api/data/orders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(seedOrders) });
         }
-      ];
-      setOrders(seedOrders);
-      localStorage.setItem("iptv_orders", JSON.stringify(seedOrders));
-    }
 
-    if (savedTrials) setTrials(JSON.parse(savedTrials));
-    else {
-      const seedTrials: TrialRequest[] = [
-        {
-          id: "TRL-1029",
-          name: "Amine Kabbaj",
-          phone: "+212650112233",
-          device: "LG Smart TV",
-          status: "pending",
-          date: "12/07/2026",
-          timestamp: Date.now() - 1200000
+        if (data.trials && data.trials.length > 0) setTrials(data.trials);
+        else {
+          const seedTrials: TrialRequest[] = [
+            {
+              id: "TRL-1029",
+              name: "Amine Kabbaj",
+              phone: "+212650112233",
+              device: "LG Smart TV",
+              status: "pending",
+              date: "12/07/2026",
+              timestamp: Date.now() - 1200000
+            }
+          ];
+          setTrials(seedTrials);
+          fetch("/api/data/trials", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(seedTrials) });
         }
-      ];
-      setTrials(seedTrials);
-      localStorage.setItem("iptv_trials", JSON.stringify(seedTrials));
-    }
 
-    if (savedContacts) setContactMessages(JSON.parse(savedContacts));
-    else {
-      const seedContacts: ContactMessage[] = [
-        {
-          id: "MSG-102",
-          name: "Karim Rachidi",
-          email: "karim.rachidi@gmail.com",
-          subject: "Demande de partenariat",
-          message: "Bonjour, j'aimerais savoir si vous proposez des tarifs de revendeur IPTV au Maroc.",
-          date: "11/07/2026",
-          timestamp: Date.now() - 100000000
+        if (data.contacts && data.contacts.length > 0) setContactMessages(data.contacts);
+        else {
+          const seedContacts: ContactMessage[] = [
+            {
+              id: "MSG-102",
+              name: "Karim Rachidi",
+              email: "karim.rachidi@gmail.com",
+              subject: "Demande de partenariat",
+              message: "Bonjour, j'aimerais savoir si vous proposez des tarifs de revendeur IPTV au Maroc.",
+              date: "11/07/2026",
+              timestamp: Date.now() - 100000000
+            }
+          ];
+          setContactMessages(seedContacts);
+          fetch("/api/data/contacts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(seedContacts) });
         }
-      ];
-      setContactMessages(seedContacts);
-      localStorage.setItem("iptv_contacts", JSON.stringify(seedContacts));
-    }
 
-    if (savedWhatsapp) setWhatsappNumber(savedWhatsapp);
-    if (savedPrice) setAnnualPriceMAD(Number(savedPrice));
-    if (savedAdminPass) setAdminPassword(savedAdminPass);
+        if (data.settings) {
+          if (data.settings.whatsappNumber) setWhatsappNumber(data.settings.whatsappNumber);
+          if (data.settings.annualPriceMAD) setAnnualPriceMAD(Number(data.settings.annualPriceMAD));
+          if (data.settings.adminPassword) setAdminPassword(data.settings.adminPassword);
+        }
+      })
+      .catch(err => console.error("Failed to load data", err));
   }, []);
 
   // Chat scroll to end helper
@@ -301,7 +290,7 @@ export default function App() {
 
     const updated = [newOrder, ...orders];
     setOrders(updated);
-    localStorage.setItem("iptv_orders", JSON.stringify(updated));
+    fetch("/api/data/orders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(updated) });
 
     // Clear form inputs
     setOrderName("");
@@ -340,7 +329,7 @@ export default function App() {
 
     const updated = [newTrial, ...trials];
     setTrials(updated);
-    localStorage.setItem("iptv_trials", JSON.stringify(updated));
+    fetch("/api/data/trials", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(updated) });
 
     // Build WhatsApp message
     const waMessage = `Bonjour IPTV Casablanca, je souhaite recevoir mon test gratuit de 1 heure s'il vous plaît !\n\n👤 *Nom :* ${name}\n📞 *Téléphone :* ${phone}\n📱 *Appareil :* ${device}`;
@@ -368,7 +357,7 @@ export default function App() {
 
     const updated = [newMsg, ...contactMessages];
     setContactMessages(updated);
-    localStorage.setItem("iptv_contacts", JSON.stringify(updated));
+    fetch("/api/data/contacts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(updated) });
 
     alert("Votre message a été enregistré avec succès ! L'équipe d'IPTV Casablanca vous contactera sous peu.");
     setContactName("");
@@ -547,13 +536,10 @@ export default function App() {
               <section className="space-y-6">
                 <div className="overflow-hidden rounded-2xl border border-white/15 bg-black/40 shadow-2xl">
                   <img
-                    src="https://raw.githubusercontent.com/iptvwebos-stack/repo/refs/heads/main/iptv-casablanca-premium.webp"
+                    src="/banner.jpg"
                     alt="IPTV Premium Casablanca Banner"
-                    className="w-full object-cover max-h-72"
-                    onError={(e) => {
-                      // Fallback image if github is blocked or failed
-                      e.currentTarget.src = "/iptv-casablanca-premium.webp";
-                    }}
+                    className="w-full h-auto block rounded-2xl"
+                    referrerPolicy="no-referrer"
                   />
                 </div>
 
@@ -2239,6 +2225,16 @@ export default function App() {
                     <Settings className="h-4 w-4" />
                     <span>Configuration</span>
                   </button>
+
+                  <button
+                    onClick={() => setAdminTab("media")}
+                    className={`flex items-center gap-2 py-2 px-4 rounded-lg font-bold text-xs md:text-sm transition-all ${
+                      adminTab === "media" ? "bg-amber-500 text-slate-950" : "text-slate-300 hover:text-white"
+                    }`}
+                  >
+                    <ImageIcon className="h-4 w-4" />
+                    <span>Médias</span>
+                  </button>
                 </div>
 
                 {/* Content Tabs */}
@@ -2365,7 +2361,7 @@ export default function App() {
                                         item.id === o.id ? { ...item, status: updatedStatus } : item
                                       );
                                       setOrders(newOrders);
-                                      localStorage.setItem("iptv_orders", JSON.stringify(newOrders));
+                                      fetch("/api/data/orders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(newOrders) });
                                     }}
                                     className={`py-1 px-2.5 rounded-lg font-bold text-[10px] uppercase border focus:outline-none ${
                                       o.status === "active"
@@ -2396,7 +2392,7 @@ export default function App() {
                                         if (confirm("Supprimer définitivement cette commande ?")) {
                                           const filtered = orders.filter((item) => item.id !== o.id);
                                           setOrders(filtered);
-                                          localStorage.setItem("iptv_orders", JSON.stringify(filtered));
+                                          fetch("/api/data/orders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(filtered) });
                                         }
                                       }}
                                       className="p-1.5 bg-red-600/15 text-red-400 hover:bg-red-600 hover:text-white rounded-lg transition-all"
@@ -2455,7 +2451,7 @@ export default function App() {
                                         item.id === t.id ? { ...item, status: nextStatus } : item
                                       );
                                       setTrials(newTrials);
-                                      localStorage.setItem("iptv_trials", JSON.stringify(newTrials));
+                                      fetch("/api/data/trials", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(newTrials) });
                                     }}
                                     className={`py-0.5 px-2.5 rounded-full font-bold text-[10px] uppercase border cursor-pointer ${
                                       t.status === "sent"
@@ -2482,7 +2478,7 @@ export default function App() {
                                         if (confirm("Supprimer cette demande d'essai ?")) {
                                           const filtered = trials.filter((item) => item.id !== t.id);
                                           setTrials(filtered);
-                                          localStorage.setItem("iptv_trials", JSON.stringify(filtered));
+                                          fetch("/api/data/trials", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(filtered) });
                                         }
                                       }}
                                       className="p-1.5 bg-red-600/15 text-red-400 hover:bg-red-600 hover:text-white rounded-lg transition-all"
@@ -2528,7 +2524,7 @@ export default function App() {
                                   if (confirm("Supprimer ce message ?")) {
                                     const filtered = contactMessages.filter((item) => item.id !== m.id);
                                     setContactMessages(filtered);
-                                    localStorage.setItem("iptv_contacts", JSON.stringify(filtered));
+                                    fetch("/api/data/contacts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(filtered) });
                                   }
                                 }}
                                 className="inline-flex items-center gap-1.5 text-xs text-red-400 hover:text-red-300 transition-colors"
@@ -2544,13 +2540,19 @@ export default function App() {
                   </div>
                 )}
 
+                {adminTab === "media" && (
+                  <AdminMediaManager />
+                )}
+
                 {adminTab === "settings" && (
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
-                      localStorage.setItem("iptv_whatsapp_number", whatsappNumber);
-                      localStorage.setItem("iptv_annual_price", annualPriceMAD.toString());
-                      localStorage.setItem("iptv_admin_password", adminPassword);
+                      fetch("/api/data/settings", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ whatsappNumber, annualPriceMAD, adminPassword })
+                      });
                       alert("Réglages mis à jour avec succès !");
                     }}
                     className="space-y-4 max-w-lg bg-slate-900 border border-white/5 p-5 rounded-2xl"
