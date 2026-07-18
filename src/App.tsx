@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import {
   Tv,
   Trophy,
@@ -36,6 +37,7 @@ import {
   Cookie,
   Star,
   MapPin,
+  Tv,
   Image as ImageIcon
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -43,8 +45,11 @@ import { ChatMessage, ChannelData, Order, TrialRequest, ContactMessage } from ".
 import { faqData, faqCategories } from "./faqData";
 import { reviewsData } from "./reviewsData";
 import AdminMediaManager from "./components/AdminMediaManager";
+import chatbotLogo from "./assets/images/iptv_chat_logo_1784379453243.jpg";
 
 export default function App() {
+  const { executeRecaptcha } = useGoogleReCaptcha();
+
   // Navigation State: 'accueil', 'installation', etc. + 'admin'
   const [currentPage, setCurrentPage] = useState<string>("accueil");
   const [prevPages, setPrevPages] = useState<string[]>([]);
@@ -79,6 +84,17 @@ export default function App() {
   const [whatsappNumber, setWhatsappNumber] = useState("212698649074");
   const [annualPriceMAD, setAnnualPriceMAD] = useState(250);
   const [adminPassword, setAdminPassword] = useState("admin123");
+  const [mediaLinks, setMediaLinks] = useState<Record<string, string>>({
+    logo: "https://raw.githubusercontent.com/iptvwebos-stack/IPTV-Casablanca-website/refs/heads/main/images/logo.jpg",
+    banner: "https://raw.githubusercontent.com/iptvwebos-stack/IPTV-Casablanca-website/refs/heads/main/images/banner.png",
+    samsung: "https://raw.githubusercontent.com/iptvwebos-stack/IPTV-Casablanca-website/refs/heads/main/images/samsung.png",
+    lg: "https://raw.githubusercontent.com/iptvwebos-stack/IPTV-Casablanca-website/refs/heads/main/images/lg.png",
+    android: "https://raw.githubusercontent.com/iptvwebos-stack/IPTV-Casablanca-website/refs/heads/main/images/android.png",
+    satellite: "https://raw.githubusercontent.com/iptvwebos-stack/IPTV-Casablanca-website/refs/heads/main/images/satellite.png",
+    xciptvLogo: "https://raw.githubusercontent.com/iptvwebos-stack/IPTV-Casablanca-website/refs/heads/main/images/xciptv-logo.png",
+    xciptvAccueil: "https://raw.githubusercontent.com/iptvwebos-stack/IPTV-Casablanca-website/refs/heads/main/images/xciptv-acceuil.jpg",
+    xciptvIdentifiants: "https://raw.githubusercontent.com/iptvwebos-stack/IPTV-Casablanca-website/refs/heads/main/images/xciptv-identifiants.jpg"
+  });
 
   // Authentication for dashboard
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
@@ -103,7 +119,7 @@ export default function App() {
     {
       id: "welcome",
       role: "assistant",
-      content: "Salut ! Je suis Youssef. On propose une seule formule d'abonnement premium : 12 mois à 250 DH seulement. Une question sur l'installation ou envie de tester ?",
+      content: "Salut ! Je suis Youssef de l'équipe IPTV Casablanca. Comment puis-je vous aider aujourd'hui ?",
       timestamp: new Date(),
     }
   ]);
@@ -216,6 +232,9 @@ export default function App() {
           if (data.settings.annualPriceMAD) setAnnualPriceMAD(Number(data.settings.annualPriceMAD));
           if (data.settings.adminPassword) setAdminPassword(data.settings.adminPassword);
         }
+        if (data.mediaLinks) {
+          setMediaLinks(data.mediaLinks);
+        }
       })
       .catch(err => console.error("Failed to load data", err));
   }, []);
@@ -274,7 +293,35 @@ export default function App() {
   };
 
   // Submit Order Helper
-  const submitNewOrder = (deviceType: string, customDetails: Record<string, string>) => {
+  const submitNewOrder = async (deviceType: string, customDetails: Record<string, string>) => {
+    let token = "dummy_token";
+    if (executeRecaptcha) {
+      try {
+        token = await executeRecaptcha("order");
+      } catch (e) {
+        console.warn("reCAPTCHA execute failed, using dummy token", e);
+      }
+    } else {
+      console.warn("reCAPTCHA not ready, using dummy token");
+    }
+
+    try {
+      const res = await fetch("/api/verify-recaptcha", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token })
+      });
+      const data = await res.json();
+      
+      if (!data.success) {
+        alert(data.error || "Validation reCAPTCHA échouée.");
+        return;
+      }
+    } catch (err) {
+      alert("Erreur de validation de sécurité.");
+      return;
+    }
+
     const newOrder: Order = {
       id: "ORD-" + Math.floor(1000 + Math.random() * 9000),
       name: orderName || "Visiteur Anonyme",
@@ -316,7 +363,35 @@ export default function App() {
   };
 
   // 1 Heure Trial submit
-  const submitTrialRequest = (name: string, phone: string, device: string) => {
+  const submitTrialRequest = async (name: string, phone: string, device: string) => {
+    let token = "dummy_token";
+    if (executeRecaptcha) {
+      try {
+        token = await executeRecaptcha("trial");
+      } catch (e) {
+        console.warn("reCAPTCHA execute failed, using dummy token", e);
+      }
+    } else {
+      console.warn("reCAPTCHA not ready, using dummy token");
+    }
+
+    try {
+      const res = await fetch("/api/verify-recaptcha", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token })
+      });
+      const data = await res.json();
+      
+      if (!data.success) {
+        alert(data.error || "Validation reCAPTCHA échouée.");
+        return;
+      }
+    } catch (err) {
+      alert("Erreur de validation de sécurité.");
+      return;
+    }
+
     const newTrial: TrialRequest = {
       id: "TRL-" + Math.floor(1000 + Math.random() * 9000),
       name: name,
@@ -338,10 +413,38 @@ export default function App() {
   };
 
   // Submit contact message
-  const handleContactSubmit = (e: React.FormEvent) => {
+  const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!contactName || !contactEmail || !contactSubject || !contactMessageText) {
       alert("Veuillez remplir tous les champs s'il vous plaît.");
+      return;
+    }
+
+    let token = "dummy_token";
+    if (executeRecaptcha) {
+      try {
+        token = await executeRecaptcha("contact");
+      } catch (e) {
+        console.warn("reCAPTCHA execute failed, using dummy token", e);
+      }
+    } else {
+      console.warn("reCAPTCHA not ready, using dummy token");
+    }
+
+    try {
+      const res = await fetch("/api/verify-recaptcha", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token })
+      });
+      const data = await res.json();
+      
+      if (!data.success) {
+        alert(data.error || "Validation reCAPTCHA échouée.");
+        return;
+      }
+    } catch (err) {
+      alert("Erreur de validation de sécurité.");
       return;
     }
 
@@ -479,14 +582,14 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col font-sans select-none overflow-x-hidden pb-24 text-white bg-gradient-to-tr from-[#1a2a6c] via-[#b21f1f] to-[#001510] bg-attachment-fixed">
+    <div className="min-h-screen flex flex-col font-sans select-none overflow-x-hidden pb-24 text-white bg-gradient-to-tr from-[#1a2a6c] via-[#b21f1f] to-[#001510]">
       
       {/* Top Banner & Header Brand */}
-      <header className="w-full bg-black/40 backdrop-blur-md border-b border-white/10 sticky top-0 z-40">
+      <header className="w-full bg-[#0a0f1d] border-b border-white/10 sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <button onClick={() => setCurrentPage("accueil")} className="flex items-center gap-2.5 text-left group">
             <img 
-              src="https://raw.githubusercontent.com/iptvwebos-stack/repo/refs/heads/main/IMG_20260714_010908.jpg"
+              src={mediaLinks.logo}
               alt="IPTV Casablanca Logo"
               className="h-10 w-10 rounded-xl object-cover shadow-md border border-white/20 transition-transform group-hover:scale-105"
               referrerPolicy="no-referrer"
@@ -526,17 +629,17 @@ export default function App() {
         <AnimatePresence mode="wait">
           <motion.div
             key={currentPage}
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            transition={{ duration: 0.3 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
           >
             {/* ----------------- PAGE 1: HERO / ACCUEIL ----------------- */}
             {currentPage === "accueil" && (
               <section className="space-y-6">
                 <div className="overflow-hidden rounded-2xl border border-white/15 bg-black/40 shadow-2xl">
                   <img
-                    src="/banner.jpg"
+                    src={mediaLinks.banner}
                     alt="IPTV Premium Casablanca Banner"
                     className="w-full h-auto block rounded-2xl"
                     referrerPolicy="no-referrer"
@@ -583,40 +686,54 @@ export default function App() {
                   <hr className="border-white/10" />
 
                   {/* Features Grid */}
-                  <div>
-                    <h3 className="text-lg font-bold text-slate-300 mb-4 text-center">Inclus dans votre abonnement :</h3>
+                  <div className="space-y-5">
+                    <h3 className="text-xl font-bold text-slate-100 tracking-tight text-center">Inclus dans votre abonnement :</h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="bg-white/5 border border-white/5 rounded-2xl p-4 text-center space-y-2 hover:bg-white/10 transition-all">
-                        <div className="h-10 w-10 mx-auto rounded-full bg-amber-500/15 flex items-center justify-center text-amber-400">
-                          <Tv className="h-5 w-5" />
+                      
+                      {/* Chaînes Directes */}
+                      <div className="bg-[#131926] border border-white/10 rounded-2xl p-5 text-center space-y-3 transition-colors hover:bg-[#182030]">
+                        <div className="h-12 w-12 mx-auto rounded-full bg-amber-500/10 flex items-center justify-center text-amber-400 border border-amber-500/15 shadow-inner">
+                          <Tv className="h-6 w-6" />
                         </div>
-                        <h4 className="font-bold text-sm">Chaînes Directes</h4>
-                        <p className="text-xs text-slate-400">+20,000 chaînes live mondiales</p>
+                        <div className="space-y-1">
+                          <h4 className="font-bold text-white text-sm md:text-base">Chaînes Directes</h4>
+                          <p className="text-xs text-slate-400 leading-normal">+20,000 chaînes live mondiales</p>
+                        </div>
                       </div>
 
-                      <div className="bg-white/5 border border-white/5 rounded-2xl p-4 text-center space-y-2 hover:bg-white/10 transition-all">
-                        <div className="h-10 w-10 mx-auto rounded-full bg-orange-500/15 flex items-center justify-center text-orange-400">
-                          <Film className="h-5 w-5" />
+                      {/* VOD Premium */}
+                      <div className="bg-[#131926] border border-white/10 rounded-2xl p-5 text-center space-y-3 transition-colors hover:bg-[#182030]">
+                        <div className="h-12 w-12 mx-auto rounded-full bg-orange-500/10 flex items-center justify-center text-orange-400 border border-orange-500/15 shadow-inner">
+                          <Film className="h-6 w-6" />
                         </div>
-                        <h4 className="font-bold text-sm">VOD Premium</h4>
-                        <p className="text-xs text-slate-400">Films récents & classiques</p>
+                        <div className="space-y-1">
+                          <h4 className="font-bold text-white text-sm md:text-base">VOD Premium</h4>
+                          <p className="text-xs text-slate-400 leading-normal">Films récents & classiques</p>
+                        </div>
                       </div>
 
-                      <div className="bg-white/5 border border-white/5 rounded-2xl p-4 text-center space-y-2 hover:bg-white/10 transition-all">
-                        <div className="h-10 w-10 mx-auto rounded-full bg-purple-500/15 flex items-center justify-center text-purple-400">
-                          <Smartphone className="h-5 w-5" />
+                      {/* Séries TV */}
+                      <div className="bg-[#131926] border border-white/10 rounded-2xl p-5 text-center space-y-3 transition-colors hover:bg-[#182030]">
+                        <div className="h-12 w-12 mx-auto rounded-full bg-purple-500/10 flex items-center justify-center text-purple-400 border border-purple-500/15 shadow-inner">
+                          <Smartphone className="h-6 w-6" />
                         </div>
-                        <h4 className="font-bold text-sm">Séries TV</h4>
-                        <p className="text-xs text-slate-400">Séries des grandes plateformes</p>
+                        <div className="space-y-1">
+                          <h4 className="font-bold text-white text-sm md:text-base">Séries TV</h4>
+                          <p className="text-xs text-slate-400 leading-normal">Séries des grandes plateformes</p>
+                        </div>
                       </div>
 
-                      <div className="bg-white/5 border border-white/5 rounded-2xl p-4 text-center space-y-2 hover:bg-white/10 transition-all">
-                        <div className="h-10 w-10 mx-auto rounded-full bg-emerald-500/15 flex items-center justify-center text-emerald-400">
-                          <Trophy className="h-5 w-5" />
+                      {/* Sports Live */}
+                      <div className="bg-[#131926] border border-white/10 rounded-2xl p-5 text-center space-y-3 transition-colors hover:bg-[#182030]">
+                        <div className="h-12 w-12 mx-auto rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/15 shadow-inner">
+                          <Trophy className="h-6 w-6" />
                         </div>
-                        <h4 className="font-bold text-sm">Sports Live</h4>
-                        <p className="text-xs text-slate-400">Matchs en direct HD/4K</p>
+                        <div className="space-y-1">
+                          <h4 className="font-bold text-white text-sm md:text-base">Sports Live</h4>
+                          <p className="text-xs text-slate-400 leading-normal">Matchs en direct HD/4K</p>
+                        </div>
                       </div>
+
                     </div>
                   </div>
 
@@ -654,16 +771,6 @@ export default function App() {
                           <Star className="h-4 w-4 fill-slate-950" />
                           <span>Lire les avis clients</span>
                         </button>
-                        <a
-                          href="https://g.page/r/CRXjuwC4utVfEBE/review"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white hover:text-amber-300 px-4 py-2.5 rounded-xl text-xs font-bold border border-white/10 transition-all shadow-md active:scale-95"
-                        >
-                          <MapPin className="h-4 w-4 text-rose-500" />
-                          <span>Laisser un avis sur Google</span>
-                          <ExternalLink className="h-3 w-3 opacity-70" />
-                        </a>
                       </div>
                     </div>
                   </div>
@@ -699,7 +806,7 @@ export default function App() {
                   >
                     <div className="h-16 w-16 rounded-full bg-white flex items-center justify-center p-3 shadow-md">
                       <img
-                        src="https://raw.githubusercontent.com/iptvwebos-stack/repo/refs/heads/main/samsung.png"
+                        src={mediaLinks.samsung}
                         alt="Samsung Smart TV"
                         className="object-contain"
                         onError={(e) => { e.currentTarget.src = "/samsung.png"; }}
@@ -716,7 +823,7 @@ export default function App() {
                   >
                     <div className="h-16 w-16 rounded-full bg-white flex items-center justify-center p-3 shadow-md">
                       <img
-                        src="https://raw.githubusercontent.com/iptvwebos-stack/repo/refs/heads/main/lg.png"
+                        src={mediaLinks.lg}
                         alt="LG Smart TV"
                         className="object-contain"
                         onError={(e) => { e.currentTarget.src = "/lg.png"; }}
@@ -733,7 +840,7 @@ export default function App() {
                   >
                     <div className="h-16 w-16 rounded-full bg-white flex items-center justify-center p-3 shadow-md">
                       <img
-                        src="https://raw.githubusercontent.com/iptvwebos-stack/repo/refs/heads/main/android(1).png"
+                        src={mediaLinks.android}
                         alt="Android TV Box"
                         className="object-contain"
                         onError={(e) => { e.currentTarget.src = "/android(1).png"; }}
@@ -750,7 +857,7 @@ export default function App() {
                   >
                     <div className="h-16 w-16 rounded-full bg-white flex items-center justify-center p-3 shadow-md">
                       <img
-                        src="https://raw.githubusercontent.com/iptvwebos-stack/repo/refs/heads/main/satellite.png"
+                        src={mediaLinks.satellite}
                         alt="Satellite Receiver"
                         className="object-contain"
                         onError={(e) => { e.currentTarget.src = "/satellite.png"; }}
@@ -1097,7 +1204,7 @@ export default function App() {
                     <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-4">
                       <div className="flex items-center gap-4">
                         <img
-                          src="https://raw.githubusercontent.com/iptvwebos-stack/repo/refs/heads/main/XCIPTV%20Logo%20Image.png"
+                          src={mediaLinks.xciptvLogo}
                           alt="XCIPTV Player Logo"
                           className="h-12 w-12 rounded-xl border border-white/20 bg-slate-900 object-contain p-1 shadow-md"
                           referrerPolicy="no-referrer"
@@ -1139,7 +1246,7 @@ export default function App() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
                       <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-xl bg-black/60 group">
                         <img
-                          src="https://raw.githubusercontent.com/iptvwebos-stack/repo/refs/heads/main/xciptv-page-accueil.jpg"
+                          src={mediaLinks.xciptvAccueil}
                           alt="XCIPTV Player Interface Mockup"
                           className="w-full h-full object-cover opacity-90 transition-all duration-300 group-hover:scale-105"
                           referrerPolicy="no-referrer"
@@ -1152,7 +1259,7 @@ export default function App() {
 
                       <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-xl bg-black/60 group">
                         <img
-                          src="https://raw.githubusercontent.com/iptvwebos-stack/repo/refs/heads/main/xciptv-identifiants.jpg"
+                          src={mediaLinks.xciptvIdentifiants}
                           alt="XCIPTV Credentials Input Screen"
                           className="w-full h-full object-cover opacity-90 transition-all duration-300 group-hover:scale-105"
                           referrerPolicy="no-referrer"
@@ -2134,6 +2241,9 @@ export default function App() {
                       <Send className="h-4.5 w-4.5" />
                       <span>Envoyer le Message</span>
                     </button>
+                    <p className="text-[10px] text-slate-500 text-center mt-2">
+                      Protégé par reCAPTCHA v3. Les <a href="https://policies.google.com/privacy" className="underline hover:text-slate-400" target="_blank" rel="noreferrer">règles de confidentialité</a> s'appliquent.
+                    </p>
                   </form>
                 </div>
 
@@ -2541,7 +2651,7 @@ export default function App() {
                 )}
 
                 {adminTab === "media" && (
-                  <AdminMediaManager />
+                  <AdminMediaManager mediaLinks={mediaLinks} setMediaLinks={setMediaLinks} />
                 )}
 
                 {adminTab === "settings" && (
@@ -2615,7 +2725,7 @@ export default function App() {
       {currentPage !== "accueil" && (
         <button
           onClick={handleBack}
-          className="fixed bottom-36 md:bottom-24 left-4 md:left-6 z-30 bg-black/85 hover:bg-black text-white font-bold py-2.5 px-4 rounded-full flex items-center gap-2 border border-white/10 shadow-2xl transition-all hover:scale-105 active:scale-95 text-sm"
+          className="fixed bottom-24 md:bottom-24 left-4 md:left-6 z-[60] bg-black/85 hover:bg-black text-white font-bold py-2.5 px-4 rounded-full flex items-center gap-2 border border-white/10 shadow-2xl transition-all hover:scale-105 active:scale-95 text-sm"
         >
           <ChevronRight className="h-4 w-4 rotate-180" />
           <span>Retour</span>
@@ -2670,7 +2780,7 @@ export default function App() {
 
       {/* Admin Auth Modal Overlay */}
       {showAdminLoginModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4">
           <form
             onSubmit={handleAdminAuth}
             className="bg-[#0f172a] border border-white/15 p-6 rounded-2xl max-w-sm w-full space-y-4 shadow-2xl text-slate-200"
@@ -2711,7 +2821,7 @@ export default function App() {
       )}
 
       {/* Chatbot Toggle Bubble on bottom right */}
-      <div className="fixed bottom-36 md:bottom-24 right-4 md:right-6 z-40 flex flex-col items-end gap-3">
+      <div className="fixed bottom-24 md:bottom-24 right-4 md:right-6 z-[60] flex flex-col items-end gap-3">
         {chatOpen && (
           <div className="bg-[#0f172a] border border-white/15 rounded-2xl w-80 md:w-96 h-[400px] flex flex-col shadow-2xl overflow-hidden text-slate-200">
             <div className="bg-gradient-to-r from-amber-500 to-orange-600 p-4 flex items-center justify-between text-slate-950 font-black text-sm">
@@ -2772,24 +2882,15 @@ export default function App() {
 
         <button
           onClick={() => setChatOpen(!chatOpen)}
-          className="bg-amber-500 hover:bg-amber-400 text-slate-950 h-14 w-14 rounded-full flex items-center justify-center shadow-2xl transition-all hover:scale-110 active:scale-95 border-2 border-white/10"
+          className="hover:opacity-90 h-16 w-16 rounded-full flex items-center justify-center shadow-2xl transition-all hover:scale-110 active:scale-95 border-2 border-white/10 p-0 overflow-hidden"
         >
-          <MessageSquare className="h-6 w-6" />
+          <img src={chatbotLogo} alt="Chatbot" className="h-full w-full object-cover" />
         </button>
       </div>
 
       {/* Menu Footer */}
-      <footer className="fixed bottom-0 left-0 right-0 z-30 bg-[#0a0f1d]/90 backdrop-blur-md border-t border-white/10 py-4 px-4 shadow-xl">
-        <nav className="max-w-4xl mx-auto flex flex-wrap justify-center gap-3 md:gap-4 text-xs md:text-sm font-semibold">
-          {currentPage !== "accueil" && (
-            <button
-              onClick={handleBack}
-              className="px-3.5 py-1.5 rounded-full bg-amber-500 text-slate-950 hover:bg-amber-400 transition-all flex items-center gap-1.5 font-black shadow-md cursor-pointer"
-            >
-              <ChevronRight className="h-3.5 w-3.5 rotate-180 stroke-[3]" />
-              <span>Retour</span>
-            </button>
-          )}
+      <footer className="fixed bottom-0 left-0 right-0 z-50 bg-[#0a0f1d] border-t border-white/10 py-2.5 md:py-4 px-2 md:px-4 shadow-xl">
+        <nav className="max-w-4xl mx-auto flex flex-wrap justify-center gap-2 md:gap-4 text-[10px] md:text-sm font-semibold">
           <button
             onClick={() => handlePageChange("a-propos")}
             className={`px-3 py-1.5 rounded-full transition-all ${currentPage === "a-propos" ? "bg-amber-500 text-slate-950" : "text-slate-300 hover:bg-white/5 hover:text-white"}`}
@@ -2839,16 +2940,7 @@ export default function App() {
             Contact
           </button>
 
-          <a
-            href="https://g.page/r/CRXjuwC4utVfEBE/review"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-3 py-1.5 rounded-full text-slate-300 hover:bg-white/5 hover:text-amber-400 transition-all flex items-center gap-1.5 font-semibold"
-          >
-            <Star className="h-3.5 w-3.5 text-amber-400 fill-amber-400" />
-            <span>Avis Google</span>
-            <ExternalLink className="h-3 w-3 opacity-60" />
-          </a>
+
 
           <button
             onClick={() => {

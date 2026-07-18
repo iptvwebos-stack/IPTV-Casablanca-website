@@ -6,17 +6,73 @@ import dotenv from "dotenv";
 import multer from "multer";
 import sharp from "sharp";
 import fs from "fs/promises";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 
 dotenv.config();
+
 const app = express();
+app.set("trust proxy", 1);
 const PORT = 3000;
 
-// Middleware to parse JSON bodies
-app.use(express.json());
+// En-têtes de sécurité HTTP (Helmet)
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false
+}));
 
+// Protection contre les attaques (Rate Limiting)
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: { error: "Trop de requêtes depuis cette IP, veuillez réessayer dans 15 minutes." },
+  validate: false,
+  keyGenerator: (req) => {
+    return (req.headers["x-forwarded-for"] as string)?.split(',')[0] || (req.headers["forwarded"] as string) || req.ip || req.socket.remoteAddress || "unknown";
+  }
+});
+app.use("/api/", apiLimiter);
+
+// Middleware to parse JSON bodies
+app.use(express.json({ limit: "1mb" }));
+
+app.post("/api/verify-recaptcha", async (req, res) => {
+  const { token } = req.body;
+  if (!token) return res.status(400).json({ success: false, error: "Token manquant" });
+  
+  const secretKey = process.env.RECAPTCHA_SECRET_KEY || "dummy_secret_key";
+  if (secretKey === "dummy_secret_key") {
+    // Mode démo si la clé n'est pas configurée
+    return res.json({ success: true, score: 0.9 });
+  }
+
+  try {
+    const response = await fetch(`https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${token}`, {
+      method: 'POST'
+    });
+    const data = await response.json();
+    if (data.success && data.score >= 0.5) {
+      res.json({ success: true, score: data.score });
+    } else {
+      res.status(400).json({ success: false, error: "Score reCAPTCHA trop bas, activité suspecte." });
+    }
+  } catch (e) {
+    res.status(500).json({ success: false, error: "Erreur de validation reCAPTCHA." });
+  }
+});
+
+// En-têtes de sécurité HTTP (Helmet)
+app.use(helmet({
+  contentSecurityPolicy: false, // On désactive CSP temporairement pour éviter de bloquer Vite ou les images externes
+  crossOriginEmbedderPolicy: false
+}));
+
+
+// Middleware to parse JSON bodies (avec limite de taille)
+app.use(express.json({ limit: "1mb" })); // Limite la taille pour protéger le serveur
 // JSON Database Setup
 const DATA_FILE = path.join(process.cwd(), "data.json");
-let db = {
+let db: any = {
   orders: [],
   trials: [],
   contacts: [],
@@ -24,6 +80,17 @@ let db = {
     whatsappNumber: "212698649074",
     annualPriceMAD: 250,
     adminPassword: "admin123"
+  },
+  mediaLinks: {
+    "logo": "https://raw.githubusercontent.com/iptvwebos-stack/IPTV-Casablanca-website/refs/heads/main/images/logo.jpg",
+    "banner": "https://raw.githubusercontent.com/iptvwebos-stack/IPTV-Casablanca-website/refs/heads/main/images/banner.png",
+    "samsung": "https://raw.githubusercontent.com/iptvwebos-stack/IPTV-Casablanca-website/refs/heads/main/images/samsung.png",
+    "lg": "https://raw.githubusercontent.com/iptvwebos-stack/IPTV-Casablanca-website/refs/heads/main/images/lg.png",
+    "android": "https://raw.githubusercontent.com/iptvwebos-stack/IPTV-Casablanca-website/refs/heads/main/images/android.png",
+    "satellite": "https://raw.githubusercontent.com/iptvwebos-stack/IPTV-Casablanca-website/refs/heads/main/images/satellite.png",
+    "xciptvLogo": "https://raw.githubusercontent.com/iptvwebos-stack/IPTV-Casablanca-website/refs/heads/main/images/xciptv-logo.png",
+    "xciptvAccueil": "https://raw.githubusercontent.com/iptvwebos-stack/IPTV-Casablanca-website/refs/heads/main/images/xciptv-acceuil.jpg",
+    "xciptvIdentifiants": "https://raw.githubusercontent.com/iptvwebos-stack/IPTV-Casablanca-website/refs/heads/main/images/xciptv-identifiants.jpg"
   }
 };
 
@@ -73,6 +140,12 @@ app.post("/api/data/settings", async (req, res) => {
   res.json({ success: true });
 });
 
+app.post("/api/data/media", async (req, res) => {
+  db.mediaLinks = { ...db.mediaLinks, ...req.body };
+  await saveDb();
+  res.json({ success: true });
+});
+
 // Set up Multer for memory storage
 const upload = multer({ 
   storage: multer.memoryStorage(),
@@ -109,10 +182,10 @@ app.post("/api/chat", async (req, res) => {
     const SYSTEM_INSTRUCTION = `Vous êtes "Youssef", conseiller de support client chez "IPTV Casablanca".
 Règles ABSOLUES de comportement et communication :
 1. Vos réponses doivent être TRÈS directes, courtes et naturelles (style conversationnel parlé spontané, pas de blabla inutile, maximum 1 ou 2 courtes phrases).
-2. Nous proposons UNE SEULE ET UNIQUE offre d'abonnement : 12 mois pour ${currentPrice} DH. Nous n'avons AUCUN autre forfait (pas d'offre 3 mois, 6 mois ou 24 mois). Si on vous demande le prix, dites simplement : "C'est ${currentPrice} DH pour l'abonnement de 12 mois. C'est notre unique formule."
+2. Notre abonnement premium de 12 mois est à ${currentPrice} DH. Ne dites pas que c'est une formule unique ou la seule offre, donnez simplement le prix de l'abonnement annuel.
 3. Soyez spontané et amical. Si l'utilisateur parle en Darija (arabe marocain), répondez-lui de la même manière très courte et naturelle.
 4. Pour l'installation, donnez une réponse ultra-rapide ou renvoyez-les vers WhatsApp.
-5. Invitez-les à passer commande ou demander un test gratuit sur WhatsApp d'un simple clic.`;
+5. NE PROPOSEZ PAS de test gratuit de vous-même. SEULEMENT SI le client vous demande explicitement un test, dites-lui qu'il peut obtenir un test gratuit en nous contactant sur WhatsApp.`;
 
     if (!messages || !Array.isArray(messages)) {
       return res.status(400).json({ error: "Messages array is required" });
@@ -125,7 +198,7 @@ Règles ABSOLUES de comportement et communication :
       let responseText = "Salut ! Je suis Youssef. Comment puis-je t'aider ?\n";
       
       if (lastUserMsg.includes("prix") || lastUserMsg.includes("tarif") || lastUserMsg.includes("combien") || lastUserMsg.includes("abonnement") || lastUserMsg.includes("offre")) {
-        responseText = `On a une seule offre : 12 mois pour ${currentPrice} DH seulement. C'est l'unique formule !`;
+        responseText = `L'abonnement premium de 12 mois est à ${currentPrice} DH.`;
       } else if (lastUserMsg.includes("test") || lastUserMsg.includes("gratuit") || lastUserMsg.includes("essai")) {
         responseText = "Oui, on propose un test gratuit d'une heure. Contacte-nous directement sur WhatsApp pour l'activer !";
       } else if (lastUserMsg.includes("tv") || lastUserMsg.includes("smart") || lastUserMsg.includes("smarters") || lastUserMsg.includes("installer") || lastUserMsg.includes("application") || lastUserMsg.includes("android") || lastUserMsg.includes("firestick")) {

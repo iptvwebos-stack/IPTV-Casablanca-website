@@ -39,7 +39,7 @@ export default function Navbar({ onNavigate, activeSection }: NavbarProps) {
           id="btn-nav-logo"
         >
           <img 
-            src="https://raw.githubusercontent.com/iptvwebos-stack/repo/refs/heads/main/IMG_20260714_010908.jpg"
+            src="https://raw.githubusercontent.com/iptvwebos-stack/IPTV-Casablanca-website/refs/heads/main/images/logo.jpg"
             alt="IPTV Casablanca Logo"
             className="h-10 w-10 rounded-xl object-cover shadow-md border border-white/20 transition-transform group-hover:scale-105"
             referrerPolicy="no-referrer"

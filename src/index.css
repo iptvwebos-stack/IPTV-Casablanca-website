@@ -14,8 +14,7 @@
 }
 
 body {
-  background: linear-gradient(135deg, #1a2a6c, #b21f1f, #001510);
-  background-attachment: fixed;
+  background-color: #0c1020;
   color: #ffffff;
   font-family: var(--font-sans);
 }
